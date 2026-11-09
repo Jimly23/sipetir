@@ -8,7 +8,7 @@ import {
   FolderOpenIcon,
   DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline'
-import api, { formatRupiah, formatDate } from '../../services/api'
+import api, { API_BASE_URL, formatRupiah, formatDate } from '../../services/api'
 import {
   Category,
   Subcategory,
@@ -132,7 +132,7 @@ export const ReportView: React.FC = () => {
       params.append('format', format)
 
       const token = localStorage.getItem('hakam_auth_token')
-      const response = await fetch(`/api/reports/export?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/reports/export?${params.toString()}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
