@@ -271,7 +271,7 @@ export const CategoryList: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleOpenAddSub(cat)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-xs transition-colors cursor-pointer"
                   >
                     <PlusIcon className="w-3.5 h-3.5" />
                     <span>Tambah Modus</span>
