@@ -24,8 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cases', [CaseController::class, 'index']);
     Route::get('/cases/{id}', [CaseController::class, 'show']);
 
-    // Cases — create/edit (admin, operator, penyidik)
-    Route::middleware('role:admin,operator,penyidik')->group(function () {
+    // Cases — create/edit (admin, pimpinan, penyidik)
+    Route::middleware('role:admin,pimpinan,penyidik')->group(function () {
         Route::post('/cases', [CaseController::class, 'store']);
         Route::put('/cases/{id}', [CaseController::class, 'update']);
         Route::patch('/cases/{id}', [CaseController::class, 'update']);
@@ -49,8 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/categories/{categoryId}/subcategories/{subcategoryId}', [CategoryController::class, 'destroySubcategory']);
     });
 
-    // Reports — admin, pimpinan
-    Route::middleware('role:admin,pimpinan,operator,penyidik')->group(function () {
+    // Reports — admin, pimpinan, penyidik
+    Route::middleware('role:admin,pimpinan,penyidik')->group(function () {
         Route::get('/reports', [ReportController::class, 'index']);
         Route::get('/reports/export', [ReportController::class, 'export']);
     });

@@ -5,6 +5,7 @@ import {
   UserIcon,
   DocumentTextIcon,
   ShieldExclamationIcon,
+  ShieldCheckIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline'
 import api, { formatRupiah } from '../../services/api'
@@ -16,11 +17,11 @@ export const CaseForm: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const isEdit = !!id
   const navigate = useNavigate()
-  const { hasRole } = useAuth()
+  const { user, hasRole } = useAuth()
 
-  // Guard: Only admin, operator, penyidik can create/edit
+  // Guard: Only admin, pimpinan, penyidik can create/edit
   useEffect(() => {
-    if (!hasRole(['admin', 'operator', 'penyidik'])) {
+    if (!hasRole(['admin', 'pimpinan', 'penyidik'])) {
       navigate('/cases')
     }
   }, [hasRole, navigate])
@@ -118,6 +119,16 @@ export const CaseForm: React.FC = () => {
       setAvailableSubcategories([])
     }
   }, [formData.category_id, categories])
+
+  // Auto-assign logged in penyidik when creating a new case
+  useEffect(() => {
+    if (!isEdit && user?.role === 'penyidik') {
+      setFormData((prev) => ({
+        ...prev,
+        officer_id: user.id.toString(),
+      }))
+    }
+  }, [isEdit, user])
 
   // Validation
   const validate = () => {
@@ -358,6 +369,52 @@ export const CaseForm: React.FC = () => {
           </div>
 
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            {/* Tanggal Kejadian */}
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">
+                Tanggal Kejadian <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="date"
+                max={new Date().toISOString().split('T')[0]}
+                value={formData.incident_date}
+                onChange={(e) =>
+                  setFormData({ ...formData, incident_date: e.target.value })
+                }
+                className={`w-full py-2 px-3 bg-slate-50 border rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  formErrors.incident_date ? 'border-rose-400' : 'border-slate-200'
+                }`}
+              />
+              {formErrors.incident_date && (
+                <p className="mt-1 text-[11px] text-rose-600">
+                  {formErrors.incident_date}
+                </p>
+              )}
+            </div>
+
+            {/* Tanggal Laporan */}
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">
+                Tanggal Laporan <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="date"
+                max={new Date().toISOString().split('T')[0]}
+                value={formData.report_date}
+                onChange={(e) =>
+                  setFormData({ ...formData, report_date: e.target.value })
+                }
+                className={`w-full py-2 px-3 bg-slate-50 border rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  formErrors.report_date ? 'border-rose-400' : 'border-slate-200'
+                }`}
+              />
+              {formErrors.report_date && (
+                <p className="mt-1 text-[11px] text-rose-600">
+                  {formErrors.report_date}
+                </p>
+              )}
+            </div>
+
             {/* Kategori Kejahatan */}
             <div>
               <label className="block font-medium text-slate-700 mb-1">
@@ -461,96 +518,53 @@ export const CaseForm: React.FC = () => {
               )}
             </div>
 
-            {/* Tanggal Kejadian */}
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">
-                Tanggal Kejadian <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="date"
-                max={new Date().toISOString().split('T')[0]}
-                value={formData.incident_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, incident_date: e.target.value })
-                }
-                className={`w-full py-2 px-3 bg-slate-50 border rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  formErrors.incident_date ? 'border-rose-400' : 'border-slate-200'
-                }`}
-              />
-              {formErrors.incident_date && (
-                <p className="mt-1 text-[11px] text-rose-600">
-                  {formErrors.incident_date}
-                </p>
-              )}
-            </div>
-
-            {/* Tanggal Laporan */}
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">
-                Tanggal Laporan <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="date"
-                max={new Date().toISOString().split('T')[0]}
-                value={formData.report_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, report_date: e.target.value })
-                }
-                className={`w-full py-2 px-3 bg-slate-50 border rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  formErrors.report_date ? 'border-rose-400' : 'border-slate-200'
-                }`}
-              />
-              {formErrors.report_date && (
-                <p className="mt-1 text-[11px] text-rose-600">
-                  {formErrors.report_date}
-                </p>
-              )}
-            </div>
-
-            {/* Status Kasus */}
-            <div>
-              <label className="block font-medium text-slate-700 mb-1">
-                Status Kasus
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value as CaseStatus })
-                }
-                className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="laporan_masuk">Laporan Masuk</option>
-                <option value="dalam_penyelidikan">Dalam Penyelidikan</option>
-                <option value="dalam_penyidikan">Dalam Penyidikan</option>
-                <option value="p21">P-21 (Berkas Lengkap)</option>
-                <option value="sp3">SP3 (Penghentian Penyidikan)</option>
-                <option value="selesai">Selesai</option>
-              </select>
-            </div>
-
             {/* Petugas yang Menangani */}
             <div>
-              <label className="block font-medium text-slate-700 mb-1">
-                Petugas Penangan
+              <label className="block font-medium text-slate-700 mb-1 flex items-center justify-between">
+                <span>Petugas Penangan (Penyidik)</span>
+                {user?.role === 'penyidik' && (
+                  <span className="text-[10px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    Otomatis &amp; Terkunci
+                  </span>
+                )}
               </label>
               <select
+                disabled={user?.role === 'penyidik'}
                 value={formData.officer_id}
                 onChange={(e) =>
                   setFormData({ ...formData, officer_id: e.target.value })
                 }
-                className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full py-2 px-3 border rounded-lg text-slate-800 ${
+                  user?.role === 'penyidik'
+                    ? 'bg-slate-100 text-slate-600 border-slate-300 cursor-not-allowed opacity-90'
+                    : 'bg-slate-50 border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+                }`}
               >
-                <option value="">-- Belum Ditunjuk --</option>
+                {user?.role !== 'penyidik' && (
+                  <option value="">-- Belum Ditunjuk --</option>
+                )}
+                {user?.role === 'penyidik' && !officers.some((o) => o.id === user.id) && (
+                  <option value={user.id}>{user.name} (Anda - Sedang Menginput)</option>
+                )}
                 {officers.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.name} ({o.role.toUpperCase()})
+                    {o.name} {o.id === user?.id ? '(Anda)' : ''}
                   </option>
                 ))}
               </select>
+              {user?.role === 'penyidik' ? (
+                <p className="mt-1 text-[11px] text-amber-700">
+                  Otomatis nama penyidik yang sedang login &amp; menginput. Tidak dapat diubah kecuali oleh Pimpinan atau Admin.
+                </p>
+              ) : (
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Tunjuk personel penyidik yang ditugaskan menangani berkas perkara ini.
+                </p>
+              )}
             </div>
 
             {/* Kronologi & Keterangan */}
-            <div className="sm:col-span-2">
+            <div>
               <label className="block font-medium text-slate-700 mb-1">
                 Kronologi Kejadian / Keterangan Kasus
               </label>
@@ -564,6 +578,106 @@ export const CaseForm: React.FC = () => {
                 className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+          </div>
+        </div>
+
+        {/* BAGIAN 3: STATUS KASUS - Progress Tracker */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div className="px-6 py-4 bg-slate-50/70 border-b border-slate-200 flex items-center gap-2">
+            <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              3. Status Kasus
+            </h2>
+          </div>
+
+          <div className="p-6">
+            {(() => {
+              const STATUS_STEPS: { value: CaseStatus; label: string }[] = [
+                { value: 'laporan_masuk', label: 'Laporan Masuk' },
+                { value: 'dalam_penyelidikan', label: 'Dalam Penyelidikan' },
+                { value: 'henti_lidik', label: 'Henti Lidik' },
+                { value: 'naik_penyidikan', label: 'Naik Penyidikan' },
+                { value: 'p19', label: 'P-19 (Berkas & BB Tidak Lengkap)' },
+                { value: 'p21', label: 'P-21 (Berkas & BB Lengkap)' },
+                { value: 'sp3_kurang_bukti', label: 'SP3 (Kurang Bukti)' },
+                { value: 'sp3_restoratif_justice', label: 'SP3 (Restoratif Justice)' },
+                { value: 'selesai', label: 'Selesai' },
+              ];
+              const currentIdx = STATUS_STEPS.findIndex(s => s.value === formData.status);
+
+              return (
+                <div className="space-y-1">
+                  {STATUS_STEPS.map((step, idx) => {
+                    const isPassed = idx < currentIdx;
+                    const isCurrent = idx === currentIdx;
+                    const isFuture = idx > currentIdx;
+
+                    return (
+                      <button
+                        key={step.value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, status: step.value })}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-all cursor-pointer text-xs ${
+                          isCurrent
+                            ? 'bg-blue-50 border-2 border-blue-500 ring-2 ring-blue-100'
+                            : isPassed
+                            ? 'bg-emerald-50/60 border border-emerald-200 hover:bg-emerald-50'
+                            : 'bg-slate-50/50 border border-slate-200/80 hover:bg-slate-100/60 opacity-60'
+                        }`}
+                      >
+                        {/* Step indicator */}
+                        <div
+                          className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] ${
+                            isCurrent
+                              ? 'bg-blue-600 text-white shadow-sm'
+                              : isPassed
+                              ? 'bg-emerald-500 text-white'
+                              : 'bg-slate-200 text-slate-400'
+                          }`}
+                        >
+                          {isPassed ? (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            idx + 1
+                          )}
+                        </div>
+
+                        {/* Label */}
+                        <span
+                          className={`font-semibold ${
+                            isCurrent
+                              ? 'text-blue-800'
+                              : isPassed
+                              ? 'text-emerald-700'
+                              : 'text-slate-400'
+                          }`}
+                        >
+                          {step.label}
+                        </span>
+
+                        {/* Badge */}
+                        {isCurrent && (
+                          <span className="ml-auto text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200 animate-pulse">
+                            PROSES
+                          </span>
+                        )}
+                        {isPassed && (
+                          <span className="ml-auto text-[10px] font-semibold text-emerald-600">
+                            Terlewati ✓
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+            <p className="mt-3 text-[11px] text-slate-500">
+              Klik pada status untuk mengubah tahapan kasus. Status yang berada di atas status terpilih otomatis ditandai sebagai terlewati.
+            </p>
           </div>
         </div>
 

@@ -30,17 +30,25 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $operator = User::create([
-            'name' => 'Operator Satu',
-            'email' => 'operator@gmail.com',
+        $penyidik = User::create([
+            'name' => 'Bripka Ahmad Pratama (Penyidik 1)',
+            'email' => 'penyidik@gmail.com',
             'password' => Hash::make('password123'),
-            'role' => 'operator',
+            'role' => 'penyidik',
             'is_active' => true,
         ]);
 
-        $penyidik = User::create([
-            'name' => 'Penyidik Utama',
-            'email' => 'penyidik@gmail.com',
+        $penyidik2 = User::create([
+            'name' => 'Briptu Hendra Wijaya (Penyidik 2)',
+            'email' => 'penyidik2@gmail.com',
+            'password' => Hash::make('password123'),
+            'role' => 'penyidik',
+            'is_active' => true,
+        ]);
+
+        $penyidik3 = User::create([
+            'name' => 'Aipda Kurniawan (Penyidik 3)',
+            'email' => 'penyidik3@gmail.com',
             'password' => Hash::make('password123'),
             'role' => 'penyidik',
             'is_active' => true,
@@ -104,8 +112,8 @@ class DatabaseSeeder extends Seeder
 
         // ============ SAMPLE CASES (FIKTIF) ============
         $allSubcategories = Subcategory::all();
-        $officers = [$operator, $penyidik, $admin];
-        $statuses = ['laporan_masuk', 'dalam_penyelidikan', 'dalam_penyidikan', 'p21', 'sp3', 'selesai'];
+        $officers = [$penyidik, $penyidik2, $penyidik3];
+        $statuses = ['laporan_masuk', 'dalam_penyelidikan', 'henti_lidik', 'naik_penyidikan', 'p19', 'p21', 'sp3_kurang_bukti', 'sp3_restoratif_justice', 'selesai'];
         $genders = ['laki-laki', 'perempuan'];
         $occupations = ['Wiraswasta', 'PNS', 'Karyawan Swasta', 'Mahasiswa', 'Ibu Rumah Tangga', 'Pedagang', 'Freelancer'];
 

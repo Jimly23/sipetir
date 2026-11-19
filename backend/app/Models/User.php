@@ -45,11 +45,6 @@ class User extends Authenticatable
         return $this->role === 'pimpinan';
     }
 
-    public function isOperator(): bool
-    {
-        return $this->role === 'operator';
-    }
-
     public function isPenyidik(): bool
     {
         return $this->role === 'penyidik';
@@ -57,7 +52,12 @@ class User extends Authenticatable
 
     public function canEditCases(): bool
     {
-        return in_array($this->role, ['admin', 'operator', 'penyidik']);
+        return in_array($this->role, ['admin', 'pimpinan', 'penyidik']);
+    }
+
+    public function canAssignOfficer(): bool
+    {
+        return in_array($this->role, ['admin', 'pimpinan']);
     }
 
     public function canManageUsers(): bool

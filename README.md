@@ -10,12 +10,11 @@ Semua akun menggunakan kata sandi: `password123`
 
 | Role | Nama Akun | Alamat Email | Hak Akses Utama |
 |---|---|---|---|
-| **Admin** | Administrator | `admin@gmail.com` | Akses penuh: Kelola pengguna, kategori, tambah/edit/hapus kasus, lihat dashboard & laporan. |
-| **Pimpinan** | Kepala Divisi | `pimpinan@gmail.com` | Akses baca (*Read-only*): Dashboard statistik, seluruh data kasus, dan rekapitulasi laporan (tidak dapat mengubah data). |
-| **Operator** | Operator Satu | `operator@gmail.com` | Registrasi kasus baru, perbarui data kasus, lihat dashboard dan laporan. |
-| **Penyidik** | Penyidik Utama | `penyidik@gmail.com` | Penanganan berkas perkara, ubah status/tahapan penyidikan, input kronologi, edit data kasus. |
-
-> **Catatan Pengujian:** Pada halaman login terdapat tombol cepat (*One-Click Demo Helper*) untuk langsung mengisi kredensial masing-masing role tanpa perlu mengetik manual.
+| **Admin** | Administrator | `admin@gmail.com` | Akses penuh: Kelola pengguna, kategori, tambah/edit/hapus kasus, menunjuk penyidik penangan perkara, lihat dashboard & laporan. |
+| **Pimpinan** | Kepala Divisi | `pimpinan@gmail.com` | Menunjuk penyidik yang menangani kasus, input/edit kasus, memantau dashboard statistik, seluruh data kasus, dan rekapitulasi laporan. |
+| **Penyidik 1** | Bripka Ahmad Pratama | `penyidik@gmail.com` | Input kasus baru (petugas penangan otomatis terkunci pada dirinya), penanganan berkas perkara, ubah status perkara, edit data kasus. |
+| **Penyidik 2** | Briptu Hendra Wijaya | `penyidik2@gmail.com` | Akun penyidik alternatif untuk pengujian penunjukan kasus oleh Admin/Pimpinan. |
+| **Penyidik 3** | Aipda Kurniawan | `penyidik3@gmail.com` | Akun penyidik alternatif untuk pengujian penunjukan kasus oleh Admin/Pimpinan. |
 
 ---
 
@@ -72,9 +71,9 @@ Semua endpoint dilindungi dengan middleware `auth:sanctum` (mengirimkan header `
 | `GET` | `/api/me` | Authenticated | Mendapatkan profil pengguna yang sedang login |
 | `GET` | `/api/dashboard` | All Roles | Statistik agregasi database (total kasus, total kerugian, tren bulanan, kategori, status) |
 | `GET` | `/api/cases` | All Roles | Daftar kasus dengan server-side pagination, search & multi-filter |
-| `POST` | `/api/cases` | Admin, Operator, Penyidik | Registrasi berkas kasus baru (Nomor kasus otomatis `KS-YYYYMM-XXXX`) |
+| `POST` | `/api/cases` | Admin, Pimpinan, Penyidik | Registrasi berkas kasus baru (Nomor kasus otomatis `KS-YYYYMM-XXXX`) |
 | `GET` | `/api/cases/{id}` | All Roles | Detail lengkap berkas perkara, profil pelapor, penugasan, dan audit trail |
-| `PUT/PATCH` | `/api/cases/{id}` | Admin, Operator, Penyidik | Pembaruan data perkara dan pencatatan riwayat perubahan |
+| `PUT/PATCH` | `/api/cases/{id}` | Admin, Pimpinan, Penyidik | Pembaruan data perkara dan penetapan/penunjukan penyidik |
 | `DELETE` | `/api/cases/{id}` | Admin | Soft delete berkas kasus dan pencatatan audit log |
 | `GET` | `/api/categories` | All Roles | Daftar kategori kejahatan beserta subkategori aktif |
 | `POST` | `/api/categories` | Admin | Menambah kategori kejahatan baru |

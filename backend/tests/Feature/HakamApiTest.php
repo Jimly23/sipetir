@@ -58,8 +58,8 @@ class HakamApiTest extends TestCase
 
     public function test_cases_listing_and_filter(): void
     {
-        $operator = User::where('role', 'operator')->first();
-        $this->actingAs($operator, 'sanctum');
+        $penyidik = User::where('role', 'penyidik')->first();
+        $this->actingAs($penyidik, 'sanctum');
 
         $res = $this->getJson('/api/cases?per_page=5');
         $res->assertStatus(200);
@@ -74,20 +74,75 @@ class HakamApiTest extends TestCase
         ]);
     }
 
-    public function test_pimpinan_cannot_create_case(): void
+    public function test_penyidik_auto_assigns_officer_and_cannot_change_it(): void
     {
-        $pimpinan = User::where('role', 'pimpinan')->first();
-        $this->actingAs($pimpinan, 'sanctum');
+        $penyidik = User::where('role', 'penyidik')->first();
+        $penyidik2 = User::where('role', 'penyidik')->where('id', '!=', $penyidik->id)->first();
+        $this->actingAs($penyidik, 'sanctum');
 
-        $res = $this->postJson('/api/cases', [
-            'reporter_name' => 'Test Pelapor',
-            'category_id' => 1,
-            'subcategory_id' => 1,
+        $category = Category::with('subcategories')->first();
+        $subcategory = $category->subcategories->first();
+
+        // 1. Saat penyidik input kasus, officer_id otomatis akun penyidik tersebut
+        $createRes = $this->postJson('/api/cases', [
+            'reporter_name' => 'Pelapor Penyidik Auto',
+            'category_id' => $category->id,
+            'subcategory_id' => $subcategory->id,
             'material_loss' => 1000000,
             'incident_date' => '2024-01-01',
             'report_date' => '2024-01-02',
+            'officer_id' => $penyidik2 ? $penyidik2->id : null, // Coba set orang lain
         ]);
-        $res->assertStatus(403);
+        $createRes->assertStatus(201);
+        $caseId = $createRes->json('data.id');
+        // Harus tetap bernilai id dari penyidik yang sedang login
+        $this->assertEquals($penyidik->id, $createRes->json('data.officer.id'));
+
+        // 2. Saat penyidik update kasus, tidak bisa mengubah petugas penangan
+        if ($penyidik2) {
+            $updateRes = $this->putJson('/api/cases/' . $caseId, [
+                'reporter_name' => 'Pelapor Penyidik Auto (Updated)',
+                'officer_id' => $penyidik2->id,
+            ]);
+            $updateRes->assertStatus(200);
+            $this->assertEquals($penyidik->id, $updateRes->json('data.officer.id'));
+        }
+    }
+
+    public function test_admin_and_pimpinan_can_assign_penyidik_to_case(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+        $pimpinan = User::where('role', 'pimpinan')->first();
+        $penyidik = User::where('role', 'penyidik')->first();
+        $penyidik2 = User::where('role', 'penyidik')->where('id', '!=', $penyidik->id)->first();
+
+        $category = Category::with('subcategories')->first();
+        $subcategory = $category->subcategories->first();
+
+        // Admin create case and assign to penyidik 1
+        $this->actingAs($admin, 'sanctum');
+        $createRes = $this->postJson('/api/cases', [
+            'reporter_name' => 'Kasus Penugasan',
+            'category_id' => $category->id,
+            'subcategory_id' => $subcategory->id,
+            'material_loss' => 5000000,
+            'incident_date' => '2024-02-01',
+            'report_date' => '2024-02-02',
+            'officer_id' => $penyidik->id,
+        ]);
+        $createRes->assertStatus(201);
+        $caseId = $createRes->json('data.id');
+        $this->assertEquals($penyidik->id, $createRes->json('data.officer.id'));
+
+        // Pimpinan ganti penunjukan penyidik ke penyidik 2
+        if ($penyidik2) {
+            $this->actingAs($pimpinan, 'sanctum');
+            $assignRes = $this->putJson('/api/cases/' . $caseId, [
+                'officer_id' => $penyidik2->id,
+            ]);
+            $assignRes->assertStatus(200);
+            $this->assertEquals($penyidik2->id, $assignRes->json('data.officer.id'));
+        }
     }
 
     public function test_admin_can_create_and_delete_case(): void

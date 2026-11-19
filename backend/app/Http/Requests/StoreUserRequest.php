@@ -23,7 +23,7 @@ class StoreUserRequest extends FormRequest
                 'email',
                 Rule::unique('users', 'email')->ignore($userId),
             ],
-            'role' => 'required|in:admin,pimpinan,operator,penyidik',
+            'role' => 'required|in:admin,pimpinan,penyidik',
             'is_active' => 'boolean',
         ];
 

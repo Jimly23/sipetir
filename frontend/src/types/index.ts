@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'pimpinan' | 'operator' | 'penyidik'
+export type UserRole = 'admin' | 'pimpinan' | 'penyidik'
 
 export interface User {
   id: number
@@ -37,9 +37,12 @@ export interface Category {
 export type CaseStatus =
   | 'laporan_masuk'
   | 'dalam_penyelidikan'
-  | 'dalam_penyidikan'
+  | 'henti_lidik'
+  | 'naik_penyidikan'
+  | 'p19'
   | 'p21'
-  | 'sp3'
+  | 'sp3_kurang_bukti'
+  | 'sp3_restoratif_justice'
   | 'selesai'
 
 export interface CaseRecord {

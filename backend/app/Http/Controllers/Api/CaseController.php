@@ -74,12 +74,18 @@ class CaseController extends Controller
 
     public function store(StoreCaseRequest $request): JsonResponse
     {
+        $user = $request->user();
         $data = $request->validated();
         $data['case_number'] = CaseRecord::generateCaseNumber();
-        $data['created_by'] = $request->user()->id;
+        $data['created_by'] = $user->id;
 
         if (empty($data['status'])) {
             $data['status'] = 'laporan_masuk';
+        }
+
+        // Jika user penyidik menginput kasus, otomatis nama penyidik yang sedang login
+        if ($user->isPenyidik()) {
+            $data['officer_id'] = $user->id;
         }
 
         $case = CaseRecord::create($data);
@@ -107,9 +113,15 @@ class CaseController extends Controller
     {
         $case = CaseRecord::findOrFail($id);
         $oldValues = $case->toArray();
+        $user = $request->user();
 
         $data = $request->validated();
-        $data['updated_by'] = $request->user()->id;
+        $data['updated_by'] = $user->id;
+
+        // Penyidik tidak bisa mengubah petugas penanganan (hanya admin atau pimpinan)
+        if ($user->isPenyidik()) {
+            unset($data['officer_id']);
+        }
 
         $case->update($data);
         $case->load(['category', 'subcategory', 'officer', 'creator', 'updater']);

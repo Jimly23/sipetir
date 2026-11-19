@@ -24,13 +24,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       name: 'Dashboard',
       path: '/dashboard',
       icon: ChartBarSquareIcon,
-      roles: ['admin', 'pimpinan', 'operator', 'penyidik'],
+      roles: ['admin', 'pimpinan', 'penyidik'],
     },
     {
       name: 'Data Kasus',
       path: '/cases',
       icon: FolderOpenIcon,
-      roles: ['admin', 'pimpinan', 'operator', 'penyidik'],
+      roles: ['admin', 'pimpinan', 'penyidik'],
     },
     {
       name: 'Kategori Kejahatan',
@@ -42,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       name: 'Laporan & Rekap',
       path: '/reports',
       icon: DocumentChartBarIcon,
-      roles: ['admin', 'pimpinan', 'operator', 'penyidik'],
+      roles: ['admin', 'pimpinan', 'penyidik'],
     },
     {
       name: 'Manajemen Pengguna',

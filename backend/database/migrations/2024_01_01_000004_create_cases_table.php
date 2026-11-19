@@ -25,7 +25,7 @@ return new class extends Migration
             $table->date('incident_date');
             $table->date('report_date');
             $table->text('description')->nullable();
-            $table->enum('status', ['laporan_masuk', 'dalam_penyelidikan', 'dalam_penyidikan', 'p21', 'sp3', 'selesai'])->default('laporan_masuk');
+            $table->enum('status', ['laporan_masuk', 'dalam_penyelidikan', 'henti_lidik', 'naik_penyidikan', 'p19', 'p21', 'sp3_kurang_bukti', 'sp3_restoratif_justice', 'selesai'])->default('laporan_masuk');
 
             // Officer
             $table->foreignId('officer_id')->nullable()->constrained('users');

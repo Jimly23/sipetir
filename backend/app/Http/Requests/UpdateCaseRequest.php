@@ -24,7 +24,7 @@ class UpdateCaseRequest extends FormRequest
             'incident_date' => 'sometimes|required|date|before_or_equal:today',
             'report_date' => 'sometimes|required|date|before_or_equal:today',
             'description' => 'nullable|string|max:5000',
-            'status' => 'sometimes|in:laporan_masuk,dalam_penyelidikan,dalam_penyidikan,p21,sp3,selesai',
+            'status' => 'sometimes|in:laporan_masuk,dalam_penyelidikan,henti_lidik,naik_penyidikan,p19,p21,sp3_kurang_bukti,sp3_restoratif_justice,selesai',
             'officer_id' => 'nullable|exists:users,id',
         ];
     }

@@ -112,12 +112,12 @@ class UserController extends Controller
         ]);
     }
 
-    // List officers (for case assignment dropdown)
+    // List officers / investigators (for case assignment dropdown)
     public function officers(Request $request): JsonResponse
     {
         $officers = User::where('is_active', true)
-            ->whereIn('role', ['operator', 'penyidik', 'admin'])
-            ->select('id', 'name', 'role')
+            ->where('role', 'penyidik')
+            ->select('id', 'name', 'role', 'email')
             ->orderBy('name')
             ->get();
 

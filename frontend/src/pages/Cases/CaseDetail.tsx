@@ -12,19 +12,27 @@ import {
   PrinterIcon,
 } from '@heroicons/react/24/outline'
 import api, { formatDate } from '../../services/api'
-import { CaseRecord } from '../../types'
+import { CaseRecord, User } from '../../types'
 import { StatusBadge } from '../../components/common/Badge'
 import { LoadingSpinner } from '../../components/common/LoadingSpinner'
+import { Modal } from '../../components/common/Modal'
 import { useAuth } from '../../contexts/AuthContext'
 
 export const CaseDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { hasRole } = useAuth()
+  const { user, hasRole } = useAuth()
 
   const [caseData, setCaseData] = useState<CaseRecord | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Assignment Modal State for Admin & Pimpinan
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState<boolean>(false)
+  const [officers, setOfficers] = useState<User[]>([])
+  const [selectedOfficerId, setSelectedOfficerId] = useState<string>('')
+  const [isAssigning, setIsAssigning] = useState<boolean>(false)
+  const [assignFeedback, setAssignFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     const fetchCase = async () => {
@@ -42,7 +50,46 @@ export const CaseDetail: React.FC = () => {
     fetchCase()
   }, [id])
 
-  const canEdit = hasRole(['admin', 'operator', 'penyidik'])
+  const canEdit = hasRole(['admin', 'pimpinan', 'penyidik'])
+  const canAssign = hasRole(['admin', 'pimpinan'])
+
+  const handleOpenAssignModal = async () => {
+    setSelectedOfficerId(caseData?.officer_id ? caseData.officer_id.toString() : '')
+    setIsAssignModalOpen(true)
+    try {
+      const res = await api.get('/officers')
+      setOfficers(res.data.data)
+    } catch (err) {
+      console.error('Failed to load officers', err)
+    }
+  }
+
+  const handleSaveAssignment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!caseData) return
+    setIsAssigning(true)
+    try {
+      const res = await api.put(`/cases/${caseData.id}`, {
+        officer_id: selectedOfficerId ? parseInt(selectedOfficerId) : null,
+      })
+      setCaseData(res.data.data)
+      setIsAssignModalOpen(false)
+      setAssignFeedback({
+        type: 'success',
+        text: 'Penunjukan penyidik penangan perkara berhasil diperbarui.',
+      })
+    } catch (err: unknown) {
+      console.error('Failed to assign officer', err)
+      let msg = 'Gagal menyimpan penunjukan penyidik.'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const ax = err as { response?: { data?: { message?: string } } }
+        msg = ax.response?.data?.message || msg
+      }
+      setAssignFeedback({ type: 'error', text: msg })
+    } finally {
+      setIsAssigning(false)
+    }
+  }
 
   if (isLoading) {
     return <LoadingSpinner text="Memuat berkas perkara..." />
@@ -111,6 +158,26 @@ export const CaseDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Alert Penunjukan */}
+      {assignFeedback && (
+        <div
+          className={`p-3.5 rounded-lg border text-xs flex items-center justify-between animate-in fade-in ${
+            assignFeedback.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
+          }`}
+        >
+          <span>{assignFeedback.text}</span>
+          <button
+            type="button"
+            onClick={() => setAssignFeedback(null)}
+            className="text-xs font-semibold underline ml-4"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -256,14 +323,32 @@ export const CaseDetail: React.FC = () => {
             </div>
             <div className="p-5 space-y-3.5 text-xs">
               <div>
-                <span className="text-[10px] font-medium text-slate-400 uppercase block">
-                  Petugas Penangan
-                </span>
-                <span className="font-semibold text-slate-800">
-                  {caseData.officer?.name || (
-                    <span className="text-slate-400 italic">Belum ditunjuk</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-medium text-slate-400 uppercase">
+                    Petugas Penangan (Penyidik)
+                  </span>
+                  {canAssign && (
+                    <button
+                      type="button"
+                      onClick={handleOpenAssignModal}
+                      className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    >
+                      {caseData.officer ? 'Ubah Penyidik' : 'Tunjuk Penyidik'}
+                    </button>
                   )}
-                </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-800 text-sm">
+                    {caseData.officer?.name || (
+                      <span className="text-slate-400 italic font-normal">Belum ditunjuk</span>
+                    )}
+                  </span>
+                  {caseData.officer && (
+                    <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium border border-amber-200">
+                      PENYIDIK
+                    </span>
+                  )}
+                </div>
               </div>
               <div>
                 <span className="text-[10px] font-medium text-slate-400 uppercase block">
@@ -291,6 +376,146 @@ export const CaseDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* BAGIAN: Progress Status Kasus - Full Width */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div className="px-5 py-3.5 bg-slate-50/70 border-b border-slate-200 flex items-center gap-2">
+          <ShieldCheckIcon className="w-4 h-4 text-blue-600" />
+          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            Progress Status Kasus
+          </h2>
+        </div>
+        <div className="p-5">
+          {(() => {
+            const STATUS_STEPS = [
+              { value: 'laporan_masuk', label: 'Laporan Masuk' },
+              { value: 'dalam_penyelidikan', label: 'Dalam Penyelidikan' },
+              { value: 'henti_lidik', label: 'Henti Lidik' },
+              { value: 'naik_penyidikan', label: 'Naik Penyidikan' },
+              { value: 'p19', label: 'P-19 (Berkas & BB Tidak Lengkap)' },
+              { value: 'p21', label: 'P-21 (Berkas & BB Lengkap)' },
+              { value: 'sp3_kurang_bukti', label: 'SP3 (Kurang Bukti)' },
+              { value: 'sp3_restoratif_justice', label: 'SP3 (Restoratif Justice)' },
+              { value: 'selesai', label: 'Selesai' },
+            ];
+            const currentIdx = STATUS_STEPS.findIndex(s => s.value === caseData.status);
+
+            return (
+              <div className="space-y-1">
+                {STATUS_STEPS.map((step, idx) => {
+                  const isPassed = idx < currentIdx;
+                  const isCurrent = idx === currentIdx;
+
+                  return (
+                    <div
+                      key={step.value}
+                      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs ${
+                        isCurrent
+                          ? 'bg-blue-50 border-2 border-blue-500'
+                          : isPassed
+                          ? 'bg-emerald-50/60 border border-emerald-200'
+                          : 'bg-slate-50/40 border border-slate-200/60 opacity-50'
+                      }`}
+                    >
+                      {/* Step indicator */}
+                      <div
+                        className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] ${
+                          isCurrent
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : isPassed
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-slate-200 text-slate-400'
+                        }`}
+                      >
+                        {isPassed ? (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          idx + 1
+                        )}
+                      </div>
+
+                      {/* Label */}
+                      <span
+                        className={`font-semibold ${
+                          isCurrent
+                            ? 'text-blue-800'
+                            : isPassed
+                            ? 'text-emerald-700'
+                            : 'text-slate-400'
+                        }`}
+                      >
+                        {step.label}
+                      </span>
+
+                      {/* Badge */}
+                      {isCurrent && (
+                        <span className="ml-auto text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200 animate-pulse">
+                          PROSES
+                        </span>
+                      )}
+                      {isPassed && (
+                        <span className="ml-auto text-[10px] font-semibold text-emerald-600">
+                          Terlewati ✓
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* Modal Tunjuk Penyidik (Khusus Admin & Pimpinan) */}
+      <Modal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        title={`Penunjukan Penyidik - ${caseData.case_number}`}
+        size="md"
+      >
+        <form onSubmit={handleSaveAssignment} className="space-y-4 text-xs">
+          <div>
+            <label className="block font-medium text-slate-700 mb-1">
+              Pilih Penyidik Penangan
+            </label>
+            <p className="text-[11px] text-slate-500 mb-2.5">
+              Sebagai {user?.role === 'pimpinan' ? 'Pimpinan' : 'Administrator'}, Anda berwenang menunjuk personel penyidik untuk menangani berkas perkara ini.
+            </p>
+            <select
+              value={selectedOfficerId}
+              onChange={(e) => setSelectedOfficerId(e.target.value)}
+              className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            >
+              <option value="">-- Belum Ditunjuk / Kosongkan --</option>
+              {officers.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => setIsAssignModalOpen(false)}
+              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={isAssigning}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isAssigning ? 'Menyimpan...' : 'Simpan Penunjukan'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

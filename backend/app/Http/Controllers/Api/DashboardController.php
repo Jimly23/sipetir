@@ -31,9 +31,12 @@ class DashboardController extends Controller
             COALESCE(SUM(material_loss), 0) as total_loss,
             COUNT(CASE WHEN status = 'laporan_masuk' THEN 1 END) as laporan_masuk,
             COUNT(CASE WHEN status = 'dalam_penyelidikan' THEN 1 END) as dalam_penyelidikan,
-            COUNT(CASE WHEN status = 'dalam_penyidikan' THEN 1 END) as dalam_penyidikan,
+            COUNT(CASE WHEN status = 'henti_lidik' THEN 1 END) as henti_lidik,
+            COUNT(CASE WHEN status = 'naik_penyidikan' THEN 1 END) as naik_penyidikan,
+            COUNT(CASE WHEN status = 'p19' THEN 1 END) as p19,
             COUNT(CASE WHEN status = 'p21' THEN 1 END) as p21,
-            COUNT(CASE WHEN status = 'sp3' THEN 1 END) as sp3,
+            COUNT(CASE WHEN status = 'sp3_kurang_bukti' THEN 1 END) as sp3_kurang_bukti,
+            COUNT(CASE WHEN status = 'sp3_restoratif_justice' THEN 1 END) as sp3_restoratif_justice,
             COUNT(CASE WHEN status = 'selesai' THEN 1 END) as selesai
         ")->first();
 

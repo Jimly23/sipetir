@@ -46,9 +46,12 @@ class CaseRecord extends Model
         return [
             'laporan_masuk' => 'Laporan Masuk',
             'dalam_penyelidikan' => 'Dalam Penyelidikan',
-            'dalam_penyidikan' => 'Dalam Penyidikan',
-            'p21' => 'P-21',
-            'sp3' => 'SP3',
+            'henti_lidik' => 'Henti Lidik',
+            'naik_penyidikan' => 'Naik Penyidikan',
+            'p19' => 'P-19 (Berkas & Barang Bukti Tidak Lengkap)',
+            'p21' => 'P-21 (Berkas & Barang Bukti Lengkap)',
+            'sp3_kurang_bukti' => 'SP3 (Kurang Bukti)',
+            'sp3_restoratif_justice' => 'SP3 (Restoratif Justice)',
             'selesai' => 'Selesai',
         ];
     }

@@ -76,11 +76,23 @@ export const STATUS_MAP: Record<
     text: 'text-amber-700',
     border: 'border-amber-200',
   },
-  dalam_penyidikan: {
-    label: 'Dalam Penyidikan',
+  henti_lidik: {
+    label: 'Henti Lidik',
+    bg: 'bg-rose-50',
+    text: 'text-rose-700',
+    border: 'border-rose-200',
+  },
+  naik_penyidikan: {
+    label: 'Naik Penyidikan',
     bg: 'bg-orange-50',
     text: 'text-orange-700',
     border: 'border-orange-200',
+  },
+  p19: {
+    label: 'P-19 (Tidak Lengkap)',
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    border: 'border-red-200',
   },
   p21: {
     label: 'P-21 (Lengkap)',
@@ -88,11 +100,17 @@ export const STATUS_MAP: Record<
     text: 'text-purple-700',
     border: 'border-purple-200',
   },
-  sp3: {
-    label: 'SP3 (Dihentikan)',
-    bg: 'bg-rose-50',
-    text: 'text-rose-700',
-    border: 'border-rose-200',
+  sp3_kurang_bukti: {
+    label: 'SP3 (Kurang Bukti)',
+    bg: 'bg-slate-50',
+    text: 'text-slate-700',
+    border: 'border-slate-200',
+  },
+  sp3_restoratif_justice: {
+    label: 'SP3 (Restoratif Justice)',
+    bg: 'bg-teal-50',
+    text: 'text-teal-700',
+    border: 'border-teal-200',
   },
   selesai: {
     label: 'Selesai',
@@ -113,10 +131,6 @@ export const ROLE_MAP: Record<
   pimpinan: {
     label: 'Pimpinan',
     badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  },
-  operator: {
-    label: 'Operator',
-    badgeClass: 'bg-sky-100 text-sky-800 border-sky-200',
   },
   penyidik: {
     label: 'Penyidik',

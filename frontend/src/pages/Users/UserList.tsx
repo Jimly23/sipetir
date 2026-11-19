@@ -45,7 +45,7 @@ export const UserList: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [formName, setFormName] = useState('')
   const [formEmail, setFormEmail] = useState('')
-  const [formRole, setFormRole] = useState<UserRole>('operator')
+  const [formRole, setFormRole] = useState<UserRole>('penyidik')
   const [formIsActive, setFormIsActive] = useState<boolean>(true)
   const [formPassword, setFormPassword] = useState('')
   const [formPasswordConfirm, setFormPasswordConfirm] = useState('')
@@ -83,7 +83,7 @@ export const UserList: React.FC = () => {
     setEditingUser(null)
     setFormName('')
     setFormEmail('')
-    setFormRole('operator')
+    setFormRole('penyidik')
     setFormIsActive(true)
     setFormPassword('')
     setFormPasswordConfirm('')
@@ -251,7 +251,6 @@ export const UserList: React.FC = () => {
             <option value="">Semua Role</option>
             <option value="admin">Administrator</option>
             <option value="pimpinan">Pimpinan</option>
-            <option value="operator">Operator</option>
             <option value="penyidik">Penyidik</option>
           </select>
         </div>
@@ -394,10 +393,9 @@ export const UserList: React.FC = () => {
               onChange={(e) => setFormRole(e.target.value as UserRole)}
               className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="admin">Administrator (Akses Penuh &amp; Pengguna)</option>
-              <option value="pimpinan">Pimpinan (Hanya Baca: Dashboard &amp; Laporan)</option>
-              <option value="operator">Operator (Input &amp; Edit Kasus)</option>
-              <option value="penyidik">Penyidik (Input, Tangani &amp; Edit Kasus)</option>
+              <option value="admin">Administrator (Akses Penuh)</option>
+              <option value="pimpinan">Pimpinan (Penunjukan Kasus &amp; Laporan)</option>
+              <option value="penyidik">Penyidik (Penanganan Kasus)</option>
             </select>
           </div>
 

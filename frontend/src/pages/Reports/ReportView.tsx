@@ -309,9 +309,12 @@ export const ReportView: React.FC = () => {
               <option value="">Semua Status</option>
               <option value="laporan_masuk">Laporan Masuk</option>
               <option value="dalam_penyelidikan">Dalam Penyelidikan</option>
-              <option value="dalam_penyidikan">Dalam Penyidikan</option>
-              <option value="p21">P-21</option>
-              <option value="sp3">SP3</option>
+              <option value="henti_lidik">Henti Lidik</option>
+              <option value="naik_penyidikan">Naik Penyidikan</option>
+              <option value="p19">P-19 (Berkas & Barang Bukti Tidak Lengkap)</option>
+              <option value="p21">P-21 (Berkas & Barang Bukti Lengkap)</option>
+              <option value="sp3_kurang_bukti">SP3 (Kurang Bukti)</option>
+              <option value="sp3_restoratif_justice">SP3 (Restoratif Justice)</option>
               <option value="selesai">Selesai</option>
             </select>
           </div>
